@@ -4,8 +4,9 @@ const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
 const resetBtn = document.getElementById("resetBtn");
 
-let remainingTime = 0;
+const alarmSound = new Audio("./music/alarm.mp3");
 
+let remainingTime = 0;
 let startTime = 0;
 let timerId = null;
 
@@ -43,7 +44,11 @@ startBtn.onclick = () => {
             clearInterval(timerId);
             timerId = null;
             timeDisplay.textContent = "00:00:00";
+
+            alarmSound.currentTime = 0;
+            alarmSound.play();
             alert("時間終了！");
+
             return;
         }
 
