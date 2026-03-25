@@ -5,11 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StopWatch</title>
 
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <button id="timerTab">タイマー</button>
+    <button id="pomodoroTab">ポモドーロ</button>
+
+    <br>
+
     <input type="number" id="minutesInput" placeholder="分" min="0">
     <input type="number" id="secondsInput" placeholder="秒" min="0">
+
+    <p id="modeDisplay">作業</p>
+    <p id="sessionCount">0回</p>
 
     <p id="time">00:00:00</p>
 
