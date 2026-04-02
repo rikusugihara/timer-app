@@ -4,10 +4,10 @@ HTML/CSS/JavaScriptのみで構成されています。
 
 
 ## スクリーンショット
-## タイマー
+### タイマー
 ![TimerApp](./images/timer-screenshot.png)
 
-## ポモドーロ
+### ポモドーロ
 ![TimerApp](./images/pomodoro-screenshot.png)
 
 
@@ -68,4 +68,4 @@ https://rikusugihara.github.io/timer-app/
 
 
 ## 作成者
-GitHub https
+GitHub https://github.com/rikusugihara
