@@ -61,12 +61,26 @@ pomodoroTab.onclick = () => {
 };
 
 function formatTime(ms) {
-    const milliSeconds = ms % 1000;
-    const seconds = Math.floor(ms / 1000);
-    const displaySeconds = seconds % 60;
-    const minutes = Math.floor(seconds / 60);
+    const safeMs = Math.max(0, ms);
+    const totalSeconds = Math.ceil(safeMs / 1000);
+    const displaySeconds = totalSeconds % 60;
+    const minutes = Math.floor(totalSeconds / 60);
 
-    return `${minutes.toString().padStart(2, "0")}:${displaySeconds.toString().padStart(2, "0")}:${Math.floor(milliSeconds / 10).toString().padStart(2, "0")}`;
+    return `${minutes.toString().padStart(2, "0")}:${displaySeconds.toString().padStart(2, "0")}`;
+}
+
+function getTimeLeft() {
+    const elapsed = Date.now() - startTime;
+    return remainingTime - elapsed;
+}
+
+function stopInterval() {
+    clearInterval(timerId);
+    timerId = null;
+}
+
+function updateTimerDisplay(ms) {
+    timerDisplay.textContent = formatTime(ms);
 }
 
 function startTimer() {
@@ -86,14 +100,14 @@ function startTimer() {
 
     startTime = Date.now();
 
+    updateTimerDisplay(remainingTime);
+
     timerId = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const timeLeft = remainingTime - elapsed;
+        const timeLeft = getTimeLeft();
 
         if(timeLeft <= 0) {
-            clearInterval(timerId);
-            timerId = null;
-            timerDisplay.textContent = "00:00:00";
+            stopInterval();
+            timerDisplay.textContent = "00:00";
 
             alarmSound.currentTime = 0;
             alarmSound.play();
@@ -102,50 +116,62 @@ function startTimer() {
             return;
         }
 
-        timerDisplay.textContent = formatTime(timeLeft);
+        updateTimerDisplay(timeLeft);
     }, 1000);
 }
 
-function startPomodoro() {
-    modeDisplay.textContent = "作業";
-    pomodoroDisplay.textContent = "25:00:00";
+function switchPomodoroMode() {
+    if(mode === "work") {
+        mode = "break";
+        remainingTime = breakMinutes * 60 * 1000;
 
+        sessionCount++;
+    } else {
+        mode = "work";
+        remainingTime = workMinutes * 60 * 1000;
+    }
+}
+
+function updatePomodoroDisplay(ms) {
+    pomodoroDisplay.textContent = formatTime(ms);
+}
+
+function updatePomodoroInfo() {
+    modeDisplay.textContent = mode === "work" ? "作業" : "休憩";
+    sessionDisplay.textContent = `セッション: ${sessionCount}`;
+}
+
+function startPomodoro() {
     if(timerId) return;
 
     if(remainingTime === 0) {
         remainingTime = workMinutes * 60 * 1000;
     }
 
+    updatePomodoroInfo();
+    updatePomodoroDisplay(remainingTime);
+
     startTime = Date.now();
 
     timerId = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const timeLeft = remainingTime - elapsed;
+        const timeLeft = getTimeLeft();
 
         if(timeLeft <= 0) {
-            if(mode === "work") {
-                mode = "break";
-                remainingTime = breakMinutes * 60 * 1000;
+            switchPomodoroMode();
 
-                sessionCount++;
-                sessionDisplay.textContent = `セッション: ${sessionCount}`;
-            } else {
-                mode = "work";
-                remainingTime = workMinutes * 60 * 1000;
-            }
+            updatePomodoroInfo();
+            updatePomodoroDisplay(remainingTime);
 
-            modeDisplay.textContent = mode === "work" ? "作業" : "休憩";
+            startTime = Date.now();
 
             alarmSound.currentTime = 0;
             alarmSound.play();
             alert("タイムアップ！");
 
-            startTime = Date.now();
-
             return;
         }
 
-        pomodoroDisplay.textContent = formatTime(timeLeft);
+        updatePomodoroDisplay(timeLeft);
     }, 1000);
 }
 
@@ -153,25 +179,23 @@ function resetTimer() {
     minutesInput.disabled = false;
     secondsInput.disabled = false;
 
-    clearInterval(timerId);
-    timerId = null;
+    stopInterval();
 
     remainingTime = 0;
-    timerDisplay.textContent = "00:00:00";
+    updateTimerDisplay(0);
 
     minutesInput.value = "";
     secondsInput.value = "";
 }
 
 function resetPomodoro() {
-    clearInterval(timerId);
-    timerId = null;
+    stopInterval();
 
-    remainingTime = 0;
-    pomodoroDisplay.textContent = "25:00:00";
+    mode = "work";
+    remainingTime = workMinutes * 60 * 1000;
 
-    sessionCount = 0;
-    sessionDisplay.textContent = "セッション: 0";
+    updatePomodoroInfo();
+    updatePomodoroDisplay(remainingTime);
 }
 
 startBtn.onclick = () => {
@@ -183,13 +207,10 @@ startBtn.onclick = () => {
 };
 
 stopBtn.onclick = () => {
-    if(!timerId) return;
-
-    clearInterval(timerId);
-    timerId = null;
+    stopInterval();
 
     const elapsed = Date.now() - startTime;
-    remainingTime -= elapsed;
+    remainingTime = Math.max(0, remainingTime - elapsed);
 };
 
 resetBtn.onclick = () => {
