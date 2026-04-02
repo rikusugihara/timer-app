@@ -46,6 +46,25 @@ const workMinutes = 25;
 const breakMinutes = 5;
 
 
+// bodyの見た目切替
+function setBodyMode(className) {
+    document.body.classList.remove("timer-mode", "work-mode", "break-mode");
+    document.body.classList.add(className);
+}
+
+
+// タブのactive切替
+function updateActiveTab() {
+    if(currentTab === "timer") {
+        timerTab.classList.add("active");
+        pomodoroTab.classList.remove("active");
+    } else {
+        timerTab.classList.remove("active");
+        pomodoroTab.classList.add("active");
+    }
+}
+
+
 // タイマータブの時の表示
 function showTimerUI() {
     minutesInput.style.display = "inline";
@@ -54,6 +73,9 @@ function showTimerUI() {
     modeDisplay.style.display = "none";
     sessionDisplay.style.display = "none";
     pomodoroDisplay.style.display = "none";
+
+    updateActiveTab();
+    setBodyMode("timer-mode");
 }
 
 // ポモドーロタブの時の表示
@@ -64,6 +86,9 @@ function showPomodoroUI() {
     modeDisplay.style.display = "block";
     sessionDisplay.style.display = "block";
     pomodoroDisplay.style.display = "block";
+
+    updateActiveTab()
+    setBodyMode(mode === "work" ? "work-mode" : "break-mode");
 }
 
 
@@ -191,6 +216,10 @@ function updatePomodoroDisplay(ms) {
 function updatePomodoroInfo() {
     modeDisplay.textContent = mode === "work" ? "作業" : "休憩";
     sessionDisplay.textContent = `セッション: ${sessionCount}`;
+
+    if(currentTab === "pomodoro") {
+        setBodyMode(mode === "work" ? "work-mode" : "break-mode");
+    }
 }
 
 
